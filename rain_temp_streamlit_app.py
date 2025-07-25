@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import os
 from datetime import datetime
 
-st.set_page_config(page_title="Weather Dashboard", layout="wide")
+st.set_page_config(page_title="Uganda Weather Dashboard", layout="wide")
 st.title("🌦️ Rainfall & Temperature Dashboard")
 
 @st.cache_data
