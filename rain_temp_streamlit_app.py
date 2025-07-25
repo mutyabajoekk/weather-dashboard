@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 
 st.set_page_config(page_title="Uganda Weather Dashboard", layout="wide")
-st.title("🌦️ Rainfall & Temperature Dashboard")
+st.title("🌦️ Uganda Rainfall & Temperature Dashboard")
 
 @st.cache_data
 def load_rainfall_data():
