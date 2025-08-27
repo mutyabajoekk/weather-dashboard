@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 import os
 from datetime import datetime
 
-st.set_page_config(page_title="Weather Dashboard", layout="wide")
-st.title("🌦️ Rainfall & Temperature Dashboard")
+st.set_page_config(page_title="Uganda Weather Dashboard", layout="wide")
+st.title("🌦️ Uganda Rainfall & Temperature Dashboard")
 
 @st.cache_data
 def load_rainfall_data():
@@ -171,4 +171,7 @@ st.markdown(
 st.markdown(f"_Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_")
 
 # open terminal use:   streamlit run rain_temp_streamlit_app.py     in the folder where the csvs are
+<<<<<<< HEAD
 # site is on https://weather-dashboard-fr7drp3vvadjyxe4qwdzzt.streamlit.app/
+=======
+>>>>>>> 1c4efe624ffa273d5642bc3f9fa7bc7b9e561786
