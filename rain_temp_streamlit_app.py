@@ -171,7 +171,6 @@ st.markdown(
 st.markdown(f"_Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_")
 
 # open terminal use:   streamlit run rain_temp_streamlit_app.py     in the folder where the csvs are
-<<<<<<< HEAD
+
 # site is on https://weather-dashboard-fr7drp3vvadjyxe4qwdzzt.streamlit.app/
-=======
->>>>>>> 1c4efe624ffa273d5642bc3f9fa7bc7b9e561786
+
