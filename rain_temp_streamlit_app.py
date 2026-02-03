@@ -5,6 +5,11 @@ import plotly.graph_objects as go
 import os
 from datetime import datetime
 
+current_year = datetime.now().year
+previous_year = current_year - 1
+current_year = 2026
+
+
 st.set_page_config(page_title="Uganda Weather Dashboard", layout="wide")
 st.title("🌦️ Uganda Rainfall & Temperature Dashboard")
 
@@ -47,12 +52,17 @@ selected_subcounty = st.sidebar.selectbox("Select Subcounty (optional)", ["(All)
 
 # Options
 show_rain_ltm = st.sidebar.checkbox("Show Rainfall LTM (1991–2020)", value=True)
-show_rain_2024 = st.sidebar.checkbox("Show Rainfall 2024", value=True)
-show_rain_2025 = st.sidebar.checkbox("Show Rainfall 2025", value=True)
+show_rain_prev = st.sidebar.checkbox(
+    f"Show Rainfall {previous_year}", value=True
+)
+show_rain_curr = st.sidebar.checkbox(
+    f"Show Rainfall {current_year}", value=True
+)
+
 show_rain_anomalies = st.sidebar.checkbox("Show Rainfall Anomalies", value=False)
 
 show_temp_ltm = st.sidebar.checkbox("Show Temp LTM (2002–2020)", value=True)
-show_temp_2024 = st.sidebar.checkbox("Show Temp 2024", value=True)
+show_temp_2024 = st.sidebar.checkbox("Show Temp 2024", value=True) # will be changed later when temp data is updated
 show_temp_2025 = st.sidebar.checkbox("Show Temp 2025", value=True)
 show_temp_anomalies = st.sidebar.checkbox("Show Temp Anomalies", value=False)
 
@@ -72,16 +82,30 @@ temp_filt['year'] = temp_filt['date'].dt.year
 temp_filt['month'] = temp_filt['date'].dt.month
 
 # Rainfall aggregates
-rain_ltm = rain_filt[(rain_filt['year']>=1991)&(rain_filt['year']<=2020)].groupby('month')['rainfall_mm'].mean().reindex(months)
-rain_2024 = rain_filt[rain_filt['year']==2024].groupby('month')['rainfall_mm'].mean().reindex(months)
-rain_2025 = rain_filt[rain_filt['year']==2025].groupby('month')['rainfall_mm'].mean().reindex(months)
+rain_ltm = (
+    rain_filt[(rain_filt['year'] >= 1991) & (rain_filt['year'] <= 2020)]
+    .groupby('month')['rainfall_mm']
+    .mean()
+    .reindex(months)
+)
 
-rain_ltm_s = rain_ltm
-rain_2024_s = rain_2024
-rain_2025_s = rain_2025
+rain_prev = (
+    rain_filt[rain_filt['year'] == previous_year]
+    .groupby('month')['rainfall_mm']
+    .mean()
+    .reindex(months)
+)
 
-rain_anom_2024 = rain_2024 - rain_ltm
-rain_anom_2025 = rain_2025 - rain_ltm
+rain_curr = (
+    rain_filt[rain_filt['year'] == current_year]
+    .groupby('month')['rainfall_mm']
+    .mean()
+    .reindex(months)
+)
+
+rain_anom_prev = rain_prev - rain_ltm
+rain_anom_curr = rain_curr - rain_ltm
+
 
 
 # Temperature aggregates
@@ -102,29 +126,59 @@ col1, col2 = st.columns(2)
 with col1:
     st.subheader(f"🌧️ Rainfall in {selected_subcounty if selected_subcounty != '(All)' else selected_district}")
     fig = go.Figure()
+
     if show_rain_ltm:
-        fig.add_bar(x=month_labels, y=rain_ltm_s, name='LTM (1991–2020)', marker_color='royalblue',
-                    hovertemplate='Month: %{x}<br>Rainfall: %{y:.0f} mm')
-    if show_rain_2024:
-        fig.add_bar(x=month_labels, y=rain_2024_s, name='2024', marker_color='gray',
-                    hovertemplate='Month: %{x}<br>Rainfall: %{y:.0f} mm')
-    if show_rain_2025:
-        fig.add_bar(x=month_labels, y=rain_2025_s, name='2025', marker_color='orangered',
-                    hovertemplate='Month: %{x}<br>Rainfall: %{y:.0f} mm')
+        fig.add_bar(
+            x=month_labels,
+            y=rain_ltm,
+            name='LTM (1991–2020)',
+            marker_color='royalblue'
+        )
+
+    if show_rain_prev:
+        fig.add_bar(
+            x=month_labels,
+            y=rain_prev,
+            name=str(previous_year),
+            marker_color='gray'
+        )
+
+    if show_rain_curr:
+        fig.add_bar(
+            x=month_labels,
+            y=rain_curr,
+            name=str(current_year),
+            marker_color='orangered'
+        )
+
     if show_rain_anomalies:
-        fig.add_scatter(x=month_labels, y=rain_anom_2024, name='2024 Anomaly', mode='lines+markers',
-                        line=dict(color='purple'), hovertemplate='Month: %{x}<br>Anomaly: %{y:.0f} mm')
-        fig.add_scatter(x=month_labels, y=rain_anom_2025, name='2025 Anomaly', mode='lines+markers',
-                        line=dict(color='green'), hovertemplate='Month: %{x}<br>Anomaly: %{y:.0f} mm')
-    fig.update_layout(yaxis_title='Rainfall (mm)', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                      font=dict(color='black'), legend=dict(orientation='h', y=-0.2))
+        fig.add_scatter(
+            x=month_labels,
+            y=rain_anom_prev,
+            name=f'{previous_year} Anomaly',
+            mode='lines+markers'
+        )
+        fig.add_scatter(
+            x=month_labels,
+            y=rain_anom_curr,
+            name=f'{current_year} Anomaly',
+            mode='lines+markers'
+        )
+
+    fig.update_layout(
+        yaxis_title='Rainfall (mm)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        legend=dict(orientation='h', y=-0.2)
+    )
+
     st.plotly_chart(fig, use_container_width=True)
 
     rain_csv = pd.DataFrame({
-        'Month': month_labels,
-        'LTM (1991–2020)': rain_ltm_s.values,
-        '2024': rain_2024_s.values,
-        '2025': rain_2025_s.values
+    'Month': month_labels,
+    'LTM (1991–2020)': rain_ltm.values,
+    str(previous_year): rain_prev.values,
+    str(current_year): rain_curr.values
     }).to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download rainfall data as CSV", data=rain_csv,
                        file_name=f"rainfall_{selected_district}_{selected_subcounty}.csv", mime='text/csv')
@@ -164,7 +218,8 @@ st.markdown("---")
 st.markdown(
     "📡 **Data Sources:**\n\n"
     "- 🌧️ **Rainfall** data is derived from the **Climate Hazards Group InfraRed Precipitation with Station data (CHIRPS) from 1981 to date**.\n"
-    "- 🌡️ **Temperature** data comes from the **Moderate Resolution Imaging Spectroradiometer (MODIS)** and the **Visible Infrared Imaging Radiometer Suite (VIIRS)** satellite products."
+    "- 🌡️ **Temperature** data comes from the **Moderate Resolution Imaging Spectroradiometer (MODIS)** and the **Visible Infrared Imaging Radiometer Suite (VIIRS)** satellite products up to June 2025.\n"
+	"		Data from Jul 2025 to date, is from NASA Power|DAV"
 )
 
 # Last updated
