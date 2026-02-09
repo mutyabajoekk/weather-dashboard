@@ -215,30 +215,30 @@ with col2:
     fig2 = go.Figure()
 
     if show_temp_ltm:
-    fig2.add_scatter(
-        x=month_labels,
-        y=temp_ltm_plot,
-        name='LTM (2002–2020)',
-        mode='lines+markers',
-        line=dict(color='royalblue')
+		fig2.add_scatter(
+			x=month_labels,
+			y=temp_ltm_plot,
+			name='LTM (2002–2020)',
+			mode='lines+markers',
+			line=dict(color='royalblue')
     )
 
 	if show_temp_prev:
-    fig2.add_scatter(
-        x=month_labels,
-        y=temp_prev_plot,
-        name=str(previous_year),
-        mode='lines+markers',
-        line=dict(color='gray')
+		fig2.add_scatter(
+			x=month_labels,
+			y=temp_prev_plot,
+			name=str(previous_year),
+			mode='lines+markers',
+			line=dict(color='gray')
     )
 
 	if show_temp_curr:
-    fig2.add_scatter(
-        x=month_labels,
-        y=temp_curr_plot,
-        name=str(current_year),
-        mode='lines+markers',
-        line=dict(color='orangered')
+		fig2.add_scatter(
+			x=month_labels,
+			y=temp_curr_plot,
+			name=str(current_year),
+			mode='lines+markers',
+			line=dict(color='orangered')
     )
 
 
