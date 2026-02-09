@@ -116,7 +116,6 @@ rain_anom_curr = rain_curr - rain_ltm
 
 
 # Temperature aggregates
-# Temperature aggregates
 temp_ltm = (
     temp_filt[(temp_filt['year'] >= 2002) & (temp_filt['year'] <= 2020)]
     .groupby('month')['temperature']
@@ -138,10 +137,10 @@ temp_curr = (
     .reindex(months)
 )
 
-# Smooth (3-month rolling mean)
-temp_ltm_s = temp_ltm.rolling(window=3, center=True, min_periods=1).mean()
-temp_prev_s = temp_prev.rolling(window=3, center=True, min_periods=1).mean()
-temp_curr_s = temp_curr.rolling(window=3, center=True, min_periods=1).mean()
+# Temperature aggregates (NO smoothing – behaves like rainfall)
+temp_ltm_plot  = temp_ltm
+temp_prev_plot = temp_prev
+temp_curr_plot = temp_curr
 
 # Anomalies
 temp_anom_prev = temp_prev_s - temp_ltm_s
@@ -216,31 +215,32 @@ with col2:
     fig2 = go.Figure()
 
     if show_temp_ltm:
-        fig2.add_scatter(
-            x=month_labels,
-            y=temp_ltm_s,
-            name='LTM (2002–2020)',
-            mode='lines+markers',
-            line=dict(color='royalblue')
-        )
+    fig2.add_scatter(
+        x=month_labels,
+        y=temp_ltm_plot,
+        name='LTM (2002–2020)',
+        mode='lines+markers',
+        line=dict(color='royalblue')
+    )
 
-    if show_temp_prev:
-        fig2.add_scatter(
-            x=month_labels,
-            y=temp_prev_s,
-            name=str(previous_year),
-            mode='lines+markers',
-            line=dict(color='gray')
-        )
+	if show_temp_prev:
+    fig2.add_scatter(
+        x=month_labels,
+        y=temp_prev_plot,
+        name=str(previous_year),
+        mode='lines+markers',
+        line=dict(color='gray')
+    )
 
-    if show_temp_curr:
-        fig2.add_scatter(
-            x=month_labels,
-            y=temp_curr_s,
-            name=str(current_year),
-            mode='lines+markers',
-            line=dict(color='orangered')
-        )
+	if show_temp_curr:
+    fig2.add_scatter(
+        x=month_labels,
+        y=temp_curr_plot,
+        name=str(current_year),
+        mode='lines+markers',
+        line=dict(color='orangered')
+    )
+
 
     if show_temp_anomalies:
         fig2.add_scatter(
@@ -286,8 +286,8 @@ st.markdown("---")
 st.markdown(
     "📡 **Data Sources:**\n\n"
     "- 🌧️ **Rainfall** data is derived from the **Climate Hazards Group InfraRed Precipitation with Station data (CHIRPS) from 1981 to date**.\n"
-    "- 🌡️ **Temperature** data comes from the **Moderate Resolution Imaging Spectroradiometer (MODIS)** and the **Visible Infrared Imaging Radiometer Suite (VIIRS)** satellite products up to June 2025.\n"
-	"		Data from Jul 2025 to date, is from NASA Power|DAV"
+    "- 🌡️ **Temperature** data comes from the **ERA5** as hosted on the ESA Climate center"
+	"		
 )
 
 # Last updated
