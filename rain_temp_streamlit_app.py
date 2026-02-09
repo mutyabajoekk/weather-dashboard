@@ -51,6 +51,7 @@ subcounties = sorted(set(rain_df[rain_df['district']==selected_district]['subcou
 selected_subcounty = st.sidebar.selectbox("Select Subcounty (optional)", ["(All)"] + subcounties)
 
 # Options
+#rainfall
 show_rain_ltm = st.sidebar.checkbox("Show Rainfall LTM (1991–2020)", value=True)
 show_rain_prev = st.sidebar.checkbox(
     f"Show Rainfall {previous_year}", value=True
@@ -61,10 +62,16 @@ show_rain_curr = st.sidebar.checkbox(
 
 show_rain_anomalies = st.sidebar.checkbox("Show Rainfall Anomalies", value=False)
 
+#temperature
 show_temp_ltm = st.sidebar.checkbox("Show Temp LTM (2002–2020)", value=True)
-show_temp_2024 = st.sidebar.checkbox("Show Temp 2024", value=True) # will be changed later when temp data is updated
-show_temp_2025 = st.sidebar.checkbox("Show Temp 2025", value=True)
+show_temp_prev = st.sidebar.checkbox(
+    f"Show Temp {previous_year}", value=True
+)
+show_temp_curr = st.sidebar.checkbox(
+    f"Show Temp {current_year}", value=True
+)
 show_temp_anomalies = st.sidebar.checkbox("Show Temp Anomalies", value=False)
+
 
 months = range(1,13)
 month_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -109,16 +116,37 @@ rain_anom_curr = rain_curr - rain_ltm
 
 
 # Temperature aggregates
-temp_ltm = temp_filt[(temp_filt['year']>=2002)&(temp_filt['year']<=2020)].groupby('month')['temperature'].mean().reindex(months)
-temp_2024 = temp_filt[temp_filt['year']==2024].groupby('month')['temperature'].mean().reindex(months)
-temp_2025 = temp_filt[temp_filt['year']==2025].groupby('month')['temperature'].mean().reindex(months)
+# Temperature aggregates
+temp_ltm = (
+    temp_filt[(temp_filt['year'] >= 2002) & (temp_filt['year'] <= 2020)]
+    .groupby('month')['temperature']
+    .mean()
+    .reindex(months)
+)
 
+temp_prev = (
+    temp_filt[temp_filt['year'] == previous_year]
+    .groupby('month')['temperature']
+    .mean()
+    .reindex(months)
+)
+
+temp_curr = (
+    temp_filt[temp_filt['year'] == current_year]
+    .groupby('month')['temperature']
+    .mean()
+    .reindex(months)
+)
+
+# Smooth (3-month rolling mean)
 temp_ltm_s = temp_ltm.rolling(window=3, center=True, min_periods=1).mean()
-temp_2024_s = temp_2024.rolling(window=3, center=True, min_periods=1).mean()
-temp_2025_s = temp_2025.rolling(window=3, center=True, min_periods=1).mean()
+temp_prev_s = temp_prev.rolling(window=3, center=True, min_periods=1).mean()
+temp_curr_s = temp_curr.rolling(window=3, center=True, min_periods=1).mean()
 
-temp_anom_2024 = temp_2024_s - temp_ltm_s
-temp_anom_2025 = temp_2025_s - temp_ltm_s
+# Anomalies
+temp_anom_prev = temp_prev_s - temp_ltm_s
+temp_anom_curr = temp_curr_s - temp_ltm_s
+
 
 # Charts
 col1, col2 = st.columns(2)
@@ -182,36 +210,76 @@ with col1:
     }).to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download rainfall data as CSV", data=rain_csv,
                        file_name=f"rainfall_{selected_district}_{selected_subcounty}.csv", mime='text/csv')
-
+#plotting temperature
 with col2:
     st.subheader(f"🌡️ Temperature in {selected_subcounty if selected_subcounty != '(All)' else selected_district}")
     fig2 = go.Figure()
+
     if show_temp_ltm:
-        fig2.add_scatter(x=month_labels, y=temp_ltm_s, name='LTM (2002–2020)', mode='lines+markers',
-                         line=dict(color='royalblue'), hovertemplate='Month: %{x}<br>Temp: %{y:.1f} °C')
-    if show_temp_2024:
-        fig2.add_scatter(x=month_labels, y=temp_2024_s, name='2024', mode='lines+markers',
-                         line=dict(color='gray'), hovertemplate='Month: %{x}<br>Temp: %{y:.1f} °C')
-    if show_temp_2025:
-        fig2.add_scatter(x=month_labels, y=temp_2025_s, name='2025', mode='lines+markers',
-                         line=dict(color='orangered'), hovertemplate='Month: %{x}<br>Temp: %{y:.1f} °C')
+        fig2.add_scatter(
+            x=month_labels,
+            y=temp_ltm_s,
+            name='LTM (2002–2020)',
+            mode='lines+markers',
+            line=dict(color='royalblue')
+        )
+
+    if show_temp_prev:
+        fig2.add_scatter(
+            x=month_labels,
+            y=temp_prev_s,
+            name=str(previous_year),
+            mode='lines+markers',
+            line=dict(color='gray')
+        )
+
+    if show_temp_curr:
+        fig2.add_scatter(
+            x=month_labels,
+            y=temp_curr_s,
+            name=str(current_year),
+            mode='lines+markers',
+            line=dict(color='orangered')
+        )
+
     if show_temp_anomalies:
-        fig2.add_scatter(x=month_labels, y=temp_anom_2024, name='2024 Anomaly', mode='lines+markers',
-                         line=dict(color='purple'), hovertemplate='Month: %{x}<br>Anomaly: %{y:.1f} °C')
-        fig2.add_scatter(x=month_labels, y=temp_anom_2025, name='2025 Anomaly', mode='lines+markers',
-                         line=dict(color='green'), hovertemplate='Month: %{x}<br>Anomaly: %{y:.1f} °C')
-    fig2.update_layout(yaxis_title='Temperature (°C)', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                       font=dict(color='black'), legend=dict(orientation='h', y=-0.2))
+        fig2.add_scatter(
+            x=month_labels,
+            y=temp_anom_prev,
+            name=f'{previous_year} Anomaly',
+            mode='lines+markers'
+        )
+        fig2.add_scatter(
+            x=month_labels,
+            y=temp_anom_curr,
+            name=f'{current_year} Anomaly',
+            mode='lines+markers'
+        )
+
+    fig2.update_layout(
+        yaxis_title='Temperature (°C)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        legend=dict(orientation='h', y=-0.2)
+    )
+
     st.plotly_chart(fig2, use_container_width=True)
 
+# exporting temperature to csv
     temp_csv = pd.DataFrame({
-        'Month': month_labels,
-        'LTM (2002–2020)': temp_ltm_s.values,
-        '2024': temp_2024_s.values,
-        '2025': temp_2025_s.values
-    }).to_csv(index=False).encode('utf-8')
-    st.download_button("📥 Download temperature data as CSV", data=temp_csv,
-                       file_name=f"temperature_{selected_district}_{selected_subcounty}.csv", mime='text/csv')
+    'Month': month_labels,
+    'LTM (2002–2020)': temp_ltm_s.values,
+    str(previous_year): temp_prev_s.values,
+    str(current_year): temp_curr_s.values
+}).to_csv(index=False).encode('utf-8')
+
+st.download_button(
+    "📥 Download temperature data as CSV",
+    data=temp_csv,
+    file_name=f"temperature_{selected_district}_{selected_subcounty}.csv",
+    mime='text/csv'
+)
+
 
 # Data sources
 st.markdown("---")
