@@ -141,7 +141,7 @@ rain_anom_curr = rain_curr - rain_ltm
 # Temperature aggregates (MATCH RAINFALL BEHAVIOUR)
 # ------------------------------------------------------------------
 temp_ltm = (
-    temp_filt[(temp_filt["year"] >= 2002) & (temp_filt["year"] <= 2020)]
+    temp_filt[(temp_filt["year"] >= 1984) & (temp_filt["year"] <= 2010)]
     .groupby("month")["temperature"]
     .mean()
     .reindex(months)
@@ -219,7 +219,7 @@ with col2:
         fig2.add_scatter(
             x=month_labels,
             y=temp_ltm,
-            name="LTM (2002–2020)",
+            name="LTM (1980–2010)",
             mode="lines+markers"
         )
 
