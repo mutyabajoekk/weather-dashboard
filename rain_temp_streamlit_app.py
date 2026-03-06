@@ -229,16 +229,15 @@ with col1:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+     # DOWNLOAD BUTTON (INSIDE col1)
+    csv_rain = rain_download.to_csv(index=False).encode("utf-8")
 
-#--------------------------------------------------------------------------
-csv_rain = rain_download.to_csv(index=False).encode("utf-8")
-
-st.download_button(
-    label="⬇️ Download Rainfall Data (CSV)",
-    data=csv_rain,
-    file_name=f"{selected_district}_rainfall_data.csv",
-    mime="text/csv"
-)
+    st.download_button(
+        label="⬇️ Download Rainfall Data (CSV)",
+        data=csv_rain,
+        file_name=f"{selected_district}_rainfall_data.csv",
+        mime="text/csv"
+    )
 
 # ===================== Temperature =====================
 with col2:
@@ -293,16 +292,17 @@ with col2:
     )
 
     st.plotly_chart(fig2, use_container_width=True)
+    
+     # DOWNLOAD BUTTON (INSIDE col2)
+    csv_temp = temp_download.to_csv(index=False).encode("utf-8")
 
-#-------------------------------------------------------------------
-csv_temp = temp_download.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="⬇️ Download Temperature Data (CSV)",
+        data=csv_temp,
+        file_name=f"{selected_district}_temperature_data.csv",
+        mime="text/csv"
+    )
 
-st.download_button(
-    label="⬇️ Download Temperature Data (CSV)",
-    data=csv_temp,
-    file_name=f"{selected_district}_temperature_data.csv",
-    mime="text/csv"
-)
 
 # ------------------------------------------------------------------
 # Data sources & footer
