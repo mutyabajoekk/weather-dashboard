@@ -138,6 +138,18 @@ rain_anom_prev = rain_prev - rain_ltm
 rain_anom_curr = rain_curr - rain_ltm
 
 # ------------------------------------------------------------------
+# Rainfall download dataframe
+# ------------------------------------------------------------------
+rain_download = pd.DataFrame({
+    "Month": month_labels,
+    "Rainfall_LTM_1991_2020_mm": rain_ltm.values,
+    f"Rainfall_{previous_year}_mm": rain_prev.values,
+    f"Rainfall_{current_year}_mm": rain_curr.values,
+    f"Anomaly_{previous_year}_mm": rain_anom_prev.values,
+    f"Anomaly_{current_year}_mm": rain_anom_curr.values
+})
+
+# ------------------------------------------------------------------
 # Temperature aggregates (MATCH RAINFALL BEHAVIOUR)
 # ------------------------------------------------------------------
 temp_ltm = (
@@ -163,6 +175,18 @@ temp_curr = (
 
 temp_anom_prev = temp_prev - temp_ltm
 temp_anom_curr = temp_curr - temp_ltm
+
+# ------------------------------------------------------------------
+# Temperature download dataframe
+# ------------------------------------------------------------------
+temp_download = pd.DataFrame({
+    "Month": month_labels,
+    "Temp_LTM_1984_2010_C": temp_ltm.values,
+    f"Temp_{previous_year}_C": temp_prev.values,
+    f"Temp_{current_year}_C": temp_curr.values,
+    f"Anomaly_{previous_year}_C": temp_anom_prev.values,
+    f"Anomaly_{current_year}_C": temp_anom_curr.values
+})
 
 # ------------------------------------------------------------------
 # Charts
@@ -205,6 +229,16 @@ with col1:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+#--------------------------------------------------------------------------
+csv_rain = rain_download.to_csv(index=False).encode("utf-8")
+
+st.download_button(
+    label="⬇️ Download Rainfall Data (CSV)",
+    data=csv_rain,
+    file_name=f"{selected_district}_rainfall_data.csv",
+    mime="text/csv"
+)
 
 # ===================== Temperature =====================
 with col2:
@@ -259,6 +293,16 @@ with col2:
     )
 
     st.plotly_chart(fig2, use_container_width=True)
+
+#-------------------------------------------------------------------
+csv_temp = temp_download.to_csv(index=False).encode("utf-8")
+
+st.download_button(
+    label="⬇️ Download Temperature Data (CSV)",
+    data=csv_temp,
+    file_name=f"{selected_district}_temperature_data.csv",
+    mime="text/csv"
+)
 
 # ------------------------------------------------------------------
 # Data sources & footer
